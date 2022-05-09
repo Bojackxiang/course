@@ -267,3 +267,23 @@ sample image: gkoenig/simplehttp:latest
     >所以这边打开 external link 也不会有任何的反应，因为 security group 不会让他仅需，所以需要修改 security group 
 
 ⚠️： 如果有多个 container 运行的话， environment essential: 一定要check， essential 的意思是： 如果一个 container 挂了，其他的 task 都会 
+
+⚠️：awsvpc required for fargate, optional for ec2
+
+#### 运行 task definition 
+
+- running in task directly 
+
+- running in service 
+
+  > revision： 选择 latest 
+  >
+  > Launch type： 选择 EC2
+  >
+  > Deploy type: 选择 rolloing update
+  >
+  > ⚠️在运行 service 的时候，因为我们的 cluster 就是 一个 ec2，所以我们在运行 service 的时候也要 选择 ec2
+  >
+  > ⚠️ 因为我们在创建 task definition 的时候，我们选择了 bridge，所以无论 service 和 task 如何运行，那么都会是 random assign 的port
+  >
+  > **但是 dynamic port 的问题可以在 load balance 中解决**
