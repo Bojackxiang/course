@@ -287,3 +287,48 @@ sample image: gkoenig/simplehttp:latest
   > ⚠️ 因为我们在创建 task definition 的时候，我们选择了 bridge，所以无论 service 和 task 如何运行，那么都会是 random assign 的port
   >
   > **但是 dynamic port 的问题可以在 load balance 中解决**
+
+
+
+#### ESC set up (real world with public & private network)
+
+VPC 创建流程
+
+>1. 创建 VPC
+>
+>2. 创建 subnet 
+>
+>3. subnet 会自动创建 gateway
+>4. gateway 会直接绑定在 VPC 上面
+
+
+
+对 set up infrastructure .yaml 进行了解析，
+
+> 放我们删除了 cloud formation，由这个 cloudformation 创建的所有资源都会被直接删除
+
+
+
+#### Load Balancing
+
+我们使用了 load balance 之后，我们可以让 subnet 只允许 load balance 的请求进来，但是不需要在把 很多的port 对外公开	·
+
+我们还能 给 load balance 一个 static 的weblink，这样别人就能直接访问我们的资源
+
+分析 alb external yaml 文件
+
+>#### !Sub
+>
+>```
+>!Sub ${EnvironmentName}:ExternalUrl
+>```
+>
+>**!Sub 是连接 两个 string 的意思**
+>
+>#### Fn::ImportValue
+>
+>```
+>Fn::ImportValue: !Sub ${EnvironmentName}:VpcId # 这个 sub 应该就是把这两个 value 连起来
+>```
+>
+>**Fn::ImportValue: 的意思就是别的stack 已经创建了的value （在 resource 中能够找到的）拿到这个stack 里面来使用**
