@@ -311,13 +311,15 @@ VPC 创建流程
 
 #### Load Balancing
 
-我们使用了 load balance 之后，我们可以让 subnet 只允许 load balance 的请求进来，但是不需要在把 很多的port 对外公开	·
+我们使用了 load balance 之后，我们可以让 subnet 只允许 load balance 的请求进来，但是不需要在把 很多的port 对外公开  ·
 
 我们还能 给 load balance 一个 static 的weblink，这样别人就能直接访问我们的资源
 
 分析 alb external yaml 文件
 
 >#### !Sub
+>
+>****
 >
 >```
 >!Sub ${EnvironmentName}:ExternalUrl
@@ -332,3 +334,57 @@ VPC 创建流程
 >```
 >
 >**Fn::ImportValue: 的意思就是别的stack 已经创建了的value （在 resource 中能够找到的）拿到这个stack 里面来使用**
+
+
+
+#### Use laod balancer with the Farget + EC2
+
+⚠️：还是 fargate 的 cluster 智能运行 farget 的 service， ec2 的 service 智能运行在ec2 的cluster 里面
+
+>**Fargate case** 
+>
+>VPC 选对 才能有正确的load balancer 出来
+>
+>设置 security group 
+>
+>container to load balancer 之间的设置
+>
+>production port 钥匙 80:http 
+>
+>target group name 要和 load balancer 的target group name 一样
+
+
+
+>**EC2 case**
+>
+>在 load balancer 的时候选择 选择 application **load balancer** 
+>
+>选择 role 和 load balancer name
+>
+>Click add load balancer, 在 target group name 种选择刚刚穿件的 load balancer 
+
+
+
+#### ECR
+
+LAB ： 将一个 dockerhub 里面的 image 拿出来然后放到 ECR 里面
+
+step 1 直接创建一个 repo 
+
+>aws ecr create-repository --repository-name sample-http --region ap-southeast-1 --image-scanning-configuration scanOnPush=true
+
+Step 2 将已经存在的目标 image 下载下来
+
+> doxker pull yeasy/simple-web
+
+Step 3 直接在 container repo 里面找 push 的command
+
+> aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 786766101582.dkr.ecr.ap-southeast-2.amazonaws.com
+>
+> docker tag <local image name> 786766101582.dkr.ecr.ap-southeast-2.amazonaws.com/sambuildpracticee49b74ff/helloworldfunction19d43fc4repo:latest
+>
+> docker push 786766101582.dkr.ecr.ap-southeast-2.amazonaws.com/sambuildpracticee49b74ff/helloworldfunction19d43fc4repo:latest
+
+
+
+docker tag yeasy/simple-web 786766101582.dkr.ecr.ap-southeast-2.amazonaws.com/sambuildpracticee49b74ff/helloworldfunction19d43fc4repo:latest
